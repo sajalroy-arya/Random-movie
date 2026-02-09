@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Little World</title>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- CSS STYLES --- */
+        :root {
+            --bg-color: #FDFBF7; /* Soft Cream */
+            --primary: #D4A5A5;  /* Muted Blush */
+            --secondary: #E6E6FA; /* Lavender */
+            --text: #4A4A4A;     /* Soft Gray */
+            --white: #FFFFFF;
+            --shadow: 0 10px 25px rgba(212, 165, 165, 0.15);
+            --radius: 20px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text);
+            font-family: 'Nunito', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* Page Container - simulating pages within one file */
+        .page-section {
+            display: none; /* Hidden by default */
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        .page-section.active {
+            display: block; /* Show active page */
+        }
+
+        h1 { font-size: 2.5rem; color: var(--primary); margin-bottom: 1rem; font-weight: 700; }
+        p { font-size: 1.1rem; margin-bottom: 2rem; color: #666; }
+
+        /* Buttons */
+        .btn-next {
+            display: inline-block;
+            padding: 12px 30px;
+            background-color: var(--primary);
+            color: var(--white);
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: var(--shadow);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s;
+        }
+        .btn-next:hover { transform: translateY(-3px); opacity: 0.9; }
+
+        /* Polaroid Gallery */
+        .memory-grid { display: flex; flex-direction: column; gap: 20px; margin-bottom: 30px; align-items: center;}
+        .polaroid {
+            background: var(--white);
+            padding: 15px 15px 40px 15px;
+            box-shadow: var(--shadow);
+            transform: rotate(-2deg);
+            transition: transform 0.3s;
+            width: 100%;
+            max-width: 300px;
+        }
+        .polaroid:nth-child(even) { transform: rotate(2deg); }
+        .polaroid:hover { transform: scale(1.02) rotate(0deg); z-index: 10; }
+        .polaroid img { width: 100%; border-radius: 4px; margin-bottom: 10px; }
+        .caption { font-family: 'Nunito', cursive; color: #888; font-size: 0.9rem; }
+
+        /* Floating Feelings */
+        .feelings-container { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; margin-bottom: 40px; }
+        .feeling-bubble {
+            background: var(--white);
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+            animation: float 4s ease-in-out infinite;
+        }
+        .feeling-bubble:nth-child(odd) { animation-delay: 0.5s; }
+        .feeling-bubble:hover { background: var(--secondary); transform: scale(1.1); }
+        /* Tooltip for feelings */
+        .feeling-bubble:hover::after {
+            content: attr(data-desc);
+            position: absolute;
+            bottom: 120%; left: 50%; transform: translateX(-50%);
+            background: var(--text); color: var(--white);
+            padding: 5px 10px; border-radius: 10px; font-size: 0.8rem;
+            width: max-content; pointer-events: none;
+        }
+
+        /* Moment Cards */
+        .moment-card {
+            background: var(--white);
+            border-radius: var(--radius);
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: var(--shadow);
+            text-align: left;
+        }
+        .moment-card h3 { color: var(--primary); margin-bottom: 5px; font-size: 1.2rem; }
+
+        .footer-text { margin-top: 50px; font-size: 0.8rem; color: #aaa; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
+        
+        @media (min-width: 768px) {
+            .memory-grid { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <section id="page-intro" class="page-section active">
+        <h1 id="intro-title">Loading...</h1>
+        <p id="intro-subtitle"></p>
+        <button class="btn-next" onclick="nextPage('page-memories')">Next &rarr;</button>
+    </section>
+
+    <section id="page-memories" class="page-section">
+        <h1>Moments in Time</h1>
+        <div id="memories-container" class="memory-grid"></div>
+        <button class="btn-next" onclick="nextPage('page-began')">Next &rarr;</button>
+    </section>
+
+    <section id="page-began" class="page-section">
+        <h1 id="began-title"></h1>
+        <p id="began-story"></p>
+        <button class="btn-next" onclick="nextPage('page-feelings')">Next &rarr;</button>
+    </section>
+
+    <section id="page-feelings" class="page-section">
+        <h1>You Make Me Feel...</h1>
+        <p style="font-size: 0.9rem">(Hover over the words)</p>
+        <div id="feelings-container" class="feelings-container"></div>
+        <br>
+        <button class="btn-next" onclick="nextPage('page-moments')">Next &rarr;</button>
+    </section>
+
+    <section id="page-moments" class="page-section">
+        <h1>Little Things</h1>
+        <div id="moments-container"></div>
+        <br>
+        <button class="btn-next" onclick="nextPage('page-choice')">Next &rarr;</button>
+    </section>
+
+    <section id="page-choice" class="page-section">
+        <p id="choice-text" style="font-size: 1.3rem; margin-bottom: 40px;"></p>
+        <button id="choice-btn" class="btn-next" onclick="nextPage('page-final')">Always</button>
+    </section>
+
+    <section id="page-final" class="page-section">
+        <h1 id="final-title"></h1>
+        <p id="final-message"></p>
+        <div id="footer-text" class="footer-text"></div>
+    </section>
+
+    <script>
+        // --- EDIT YOUR CONTENT HERE ---
+        const content = {
+            "intro": {
+                "title": "Our Little World",
+                "subtitle": "A small corner of the internet, just for us."
+            },
+            "memories": [
+                {
+                    "url": "https://placehold.co/300x300/e6e6fa/4a4a4a?text=First+Date",
+                    "caption": "That coffee shop where time stopped."
+                },
+                {
+                    "url": "https://placehold.co/300x300/fff0f5/4a4a4a?text=Travel",
+                    "caption": "Getting lost together was the best part."
+                },
+                {
+                    "url": "https://placehold.co/300x300/fdfbf7/4a4a4a?text=Silly+Selfie",
+                    "caption": "We look ridiculous, but I love this one."
+                }
+            ],
+            "how_we_began": {
+                "title": "How We Began",
+                "story": "It wasn't a movie scene with fireworks. It was quiet, steady, and real. We started as strangers, became friends, and somewhere in between the laughter and the late-night texts, I realized I didn't want to go a day without talking to you."
+            },
+            "feelings": [
+                { "word": "Safe", "desc": "Like the world can't touch me." },
+                { "word": "Understood", "desc": "You hear what I don't say." },
+                { "word": "Warm", "desc": "Like sunlight in winter." },
+                { "word": "Home", "desc": "Wherever you are." },
+                { "word": "Inspired", "desc": "To be my best self." }
+            ],
+            "special_moments": [
+                {
+                    "title": "The First 'Hello'",
+                    "detail": "I was nervous. You smiled. Everything changed."
+                },
+                {
+                    "title": "The Rainy Tuesday",
+                    "detail": "We ordered pizza and did absolutely nothing. It was perfect."
+                }
+            ],
+            "choice": {
+                "text": "Life gets busy. Days get hard. But through all the noise and chaos...",
+                "button": "I Choose You"
+            },
+            "final": {
+                "title": "For You",
+                "message": "Thank you for being my person. Here is to all the memories we have yet to make.",
+                "footer": "Made with love. Just for you."
+            }
+        };
+
+        // --- SYSTEM LOGIC (DO NOT EDIT BELOW) ---
+        
+        // Populate content on load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Intro
+            document.getElementById('intro-title').textContent = content.intro.title;
+            document.getElementById('intro-subtitle').textContent = content.intro.subtitle;
+
+            // Memories
+            const memContainer = document.getElementById('memories-container');
+            content.memories.forEach(mem => {
+                const div = document.createElement('div');
+                div.className = 'polaroid';
+                div.innerHTML = `<img src="${mem.url}" alt="Memory"><div class="caption">${mem.caption}</div>`;
+                memContainer.appendChild(div);
+            });
+
+            // Began
+            document.getElementById('began-title').textContent = content.how_we_began.title;
+            document.getElementById('began-story').textContent = content.how_we_began.story;
+
+            // Feelings
+            const feelContainer = document.getElementById('feelings-container');
+            content.feelings.forEach(feel => {
+                const span = document.createElement('span');
+                span.className = 'feeling-bubble';
+                span.textContent = feel.word;
+                span.setAttribute('data-desc', feel.desc);
+                feelContainer.appendChild(span);
+            });
+
+            // Moments
+            const momContainer = document.getElementById('moments-container');
+            content.special_moments.forEach(mom => {
+                const div = document.createElement('div');
+                div.className = 'moment-card';
+                div.innerHTML = `<h3>${mom.title}</h3><p>${mom.detail}</p>`;
+                momContainer.appendChild(div);
+            });
+
+            // Choice
+            document.getElementById('choice-text').textContent = content.choice.text;
+            document.getElementById('choice-btn').textContent = content.choice.button;
+
+            // Final
+            document.getElementById('final-title').textContent = content.final.title;
+            document.getElementById('final-message').textContent = content.final.message;
+            document.getElementById('footer-text').textContent = content.final.footer;
+        });
+
+        // Navigation Logic
+        function nextPage(pageId) {
+            // Hide all pages
+            const pages = document.querySelectorAll('.page-section');
+            pages.forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Show target page
+            const target = document.getElementById(pageId);
+            if (target) {
+                target.classList.add('active');
+                window.scrollTo(0,0); // Scroll to top
+            }
+        }
+    </script>
+</body>
+</html>
